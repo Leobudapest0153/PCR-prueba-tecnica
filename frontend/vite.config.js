@@ -6,5 +6,11 @@ export default defineConfig({
     server: {
         host: true,
         port: 5173,
+        watch: {
+            // El volumen montado desde el host (Windows) no siempre propaga
+            // eventos inotify al contenedor Linux, por lo que Vite necesita
+            // polling para detectar cambios de archivos de forma confiable.
+            usePolling: true,
+        },
     },
 });
