@@ -2,22 +2,27 @@
 
 API REST construida en Laravel para el registro, consulta y seguimiento de solicitudes técnicas (soporte/tickets).
 
+Este backend es parte del monorepo raíz de este repositorio. Para levantar el proyecto completo (API + base de datos + frontend) con un solo comando, ver el [README de la raíz](../README.md). Este documento cubre el detalle propio de la API: arquitectura, endpoints y ejemplos de uso.
+
 ## Requisitos
 
 - [Docker](https://www.docker.com/) y Docker Compose (no se necesita PHP ni Composer instalados en el host, todo corre en contenedores).
 
-## Levantar el entorno
+## Levantar solo el backend
 
-1. Copiar el archivo de variables de entorno:
+Todos los comandos de Docker se ejecutan desde la **raíz del repositorio** (ahí vive `docker-compose.yml`).
+
+1. Copiar los archivos de variables de entorno:
 
    ```bash
-   cp .env.example .env
+   cp .env.example .env                       # variables de orquestación (raíz)
+   cp backend/.env.example backend/.env       # variables propias de Laravel
    ```
 
-2. Construir y levantar los contenedores (aplicación + PostgreSQL dedicado):
+2. Construir y levantar los contenedores del backend (aplicación + PostgreSQL dedicado):
 
    ```bash
-   docker compose up -d --build
+   docker compose up -d --build app db
    ```
 
    En el primer arranque el contenedor `app` instala las dependencias de Composer y genera el `APP_KEY` automáticamente.
@@ -36,7 +41,7 @@ API REST construida en Laravel para el registro, consulta y seguimiento de solic
 
 | Servicio | Descripción                              | Puerto host (por defecto) |
 | -------- | ----------------------------------------- | -------------------------- |
-| `app`    | Aplicación Laravel (PHP 8.3)              | `8000`                      |
+| `app`    | Aplicación Laravel (PHP 8.4)              | `8000`                      |
 | `db`     | PostgreSQL 16, dedicado a este proyecto   | `5433` (interno: `5432`)    |
 
 El servicio `db` usa un volumen y una red propios del proyecto, por lo que no interfiere con otras instancias de PostgreSQL que puedan estar corriendo en el mismo equipo.
