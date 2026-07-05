@@ -16,6 +16,11 @@ export const useSolicitudesTecnicasStore = defineStore('solicitudesTecnicas', {
         },
         cargando: false,
         error: null,
+        // Contador interno para descartar respuestas obsoletas: si el
+        // usuario cambia de pagina o filtro antes de que responda una
+        // peticion anterior, esa respuesta ya no corresponde al ultimo
+        // estado solicitado y no debe sobreescribir el listado.
+        _idCargaActual: 0,
     }),
 
     actions: {
@@ -23,6 +28,7 @@ export const useSolicitudesTecnicasStore = defineStore('solicitudesTecnicas', {
          * Carga el listado aplicando los filtros y la pagina actuales.
          */
         async cargar(pagina = 1) {
+            const idCarga = ++this._idCargaActual;
             this.cargando = true;
             this.error = null;
 
@@ -33,13 +39,17 @@ export const useSolicitudesTecnicasStore = defineStore('solicitudesTecnicas', {
                     per_page: this.meta.per_page,
                 });
 
+                if (idCarga !== this._idCargaActual) return;
+
                 this.items = items;
                 this.meta = meta;
             } catch (error) {
+                if (idCarga !== this._idCargaActual) return;
+
                 this.error = error;
                 throw error;
             } finally {
-                this.cargando = false;
+                if (idCarga === this._idCargaActual) this.cargando = false;
             }
         },
 
