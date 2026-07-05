@@ -1,17 +1,18 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import { useSolicitudesTecnicasStore } from '../stores/solicitudesTecnicas';
+import { useNotificacionesStore } from '../stores/notificaciones';
 import { PRIORIDAD_OPCIONES } from '../enums/prioridad';
 
 const emit = defineEmits(['creada']);
 
 const store = useSolicitudesTecnicasStore();
+const notificaciones = useNotificacionesStore();
 
 const abierto = defineModel({ default: false });
 
 const formRef = ref(null);
 const enviando = ref(false);
-const errorGeneral = ref(null);
 const erroresCampos = reactive({});
 
 const datosIniciales = () => ({
@@ -29,7 +30,6 @@ const reglas = {
 };
 
 function limpiarErrores() {
-    errorGeneral.value = null;
     Object.keys(erroresCampos).forEach((campo) => delete erroresCampos[campo]);
 }
 
@@ -54,13 +54,14 @@ async function enviar() {
 
     try {
         const solicitud = await store.crear({ ...datos });
+        notificaciones.mostrarExito('Solicitud creada correctamente.');
         emit('creada', solicitud);
         cerrar();
     } catch (error) {
         if (error.response?.status === 422) {
             Object.assign(erroresCampos, error.response.data.errors);
         } else {
-            errorGeneral.value = 'Ocurrió un error al crear la solicitud. Intenta de nuevo.';
+            notificaciones.mostrarError('Ocurrió un error al crear la solicitud. Intenta de nuevo.');
         }
     } finally {
         enviando.value = false;
@@ -74,10 +75,6 @@ async function enviar() {
       <v-card-title>Nueva solicitud técnica</v-card-title>
 
       <v-card-text>
-        <v-alert v-if="errorGeneral" type="error" variant="tonal" class="mb-4">
-          {{ errorGeneral }}
-        </v-alert>
-
         <v-form ref="formRef" @submit.prevent="enviar">
           <v-text-field
             v-model="datos.cliente"

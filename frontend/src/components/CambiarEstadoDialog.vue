@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { useSolicitudesTecnicasStore } from '../stores/solicitudesTecnicas';
+import { useNotificacionesStore } from '../stores/notificaciones';
 import { ESTADO_OPCIONES } from '../enums/estadoSolicitud';
 
 const props = defineProps({
@@ -13,10 +14,10 @@ const props = defineProps({
 const abierto = defineModel({ default: false });
 
 const store = useSolicitudesTecnicasStore();
+const notificaciones = useNotificacionesStore();
 
 const estadoSeleccionado = ref(null);
 const enviando = ref(false);
-const error = ref(null);
 
 // Cada vez que se abre el dialogo se parte del estado actual de la
 // solicitud seleccionada, para que el select no arrastre la seleccion de
@@ -24,7 +25,6 @@ const error = ref(null);
 watch(abierto, (estaAbierto) => {
     if (estaAbierto && props.solicitud) {
         estadoSeleccionado.value = props.solicitud.estado;
-        error.value = null;
     }
 });
 
@@ -36,13 +36,13 @@ async function enviar() {
     if (!props.solicitud || !estadoSeleccionado.value) return;
 
     enviando.value = true;
-    error.value = null;
 
     try {
         await store.actualizarEstado(props.solicitud.id, estadoSeleccionado.value);
+        notificaciones.mostrarExito('Estado actualizado correctamente.');
         cerrar();
     } catch {
-        error.value = 'Ocurrió un error al actualizar el estado. Intenta de nuevo.';
+        notificaciones.mostrarError('Ocurrió un error al actualizar el estado. Intenta de nuevo.');
     } finally {
         enviando.value = false;
     }
@@ -58,10 +58,6 @@ async function enviar() {
         <p class="text-body-2 text-medium-emphasis mb-4">
           {{ solicitud.cliente }} · {{ solicitud.titulo }}
         </p>
-
-        <v-alert v-if="error" type="error" variant="tonal" class="mb-4">
-          {{ error }}
-        </v-alert>
 
         <v-select
           v-model="estadoSeleccionado"
