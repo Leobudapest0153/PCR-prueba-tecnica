@@ -5,11 +5,14 @@ import { PRIORIDAD_COLOR, PRIORIDAD_OPCIONES, labelPrioridad } from '../enums/pr
 import { ESTADO_COLOR, ESTADO_OPCIONES, labelEstado } from '../enums/estadoSolicitud';
 import CrearSolicitudDialog from '../components/CrearSolicitudDialog.vue';
 import DetalleSolicitudDialog from '../components/DetalleSolicitudDialog.vue';
+import CambiarEstadoDialog from '../components/CambiarEstadoDialog.vue';
 
 const store = useSolicitudesTecnicasStore();
 const dialogCrearAbierto = ref(false);
 const dialogDetalleAbierto = ref(false);
 const solicitudSeleccionadaId = ref(null);
+const dialogEstadoAbierto = ref(false);
+const solicitudParaCambiarEstado = ref(null);
 
 const headers = [
     { title: 'Cliente', key: 'cliente' },
@@ -23,6 +26,11 @@ const headers = [
 function verDetalle(solicitud) {
     solicitudSeleccionadaId.value = solicitud.id;
     dialogDetalleAbierto.value = true;
+}
+
+function abrirCambiarEstado(solicitud) {
+    solicitudParaCambiarEstado.value = solicitud;
+    dialogEstadoAbierto.value = true;
 }
 
 // Controlan la pagina actual de la tabla para poder forzar el regreso a la
@@ -78,6 +86,7 @@ async function limpiarFiltros() {
 
     <CrearSolicitudDialog v-model="dialogCrearAbierto" />
     <DetalleSolicitudDialog v-model="dialogDetalleAbierto" :solicitud-id="solicitudSeleccionadaId" />
+    <CambiarEstadoDialog v-model="dialogEstadoAbierto" :solicitud="solicitudParaCambiarEstado" />
 
     <v-card class="mb-4">
       <v-card-text>
@@ -153,6 +162,13 @@ async function limpiarFiltros() {
             size="small"
             title="Ver detalle"
             @click="verDetalle(item)"
+          />
+          <v-btn
+            icon="mdi-swap-horizontal"
+            variant="text"
+            size="small"
+            title="Cambiar estado"
+            @click="abrirCambiarEstado(item)"
           />
         </template>
 
