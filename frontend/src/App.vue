@@ -9,9 +9,7 @@
     </v-app-bar>
 
     <v-main>
-      <v-container>
-        <p>Frontend en construcción.</p>
-      </v-container>
+      <router-view />
     </v-main>
   </v-app>
 </template>
