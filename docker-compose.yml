@@ -1,0 +1,48 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: pcr_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - pcr_network
+
+  db:
+    image: postgres:16-alpine
+    container_name: pcr_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-pcr_prueba_tecnica}
+      POSTGRES_USER: ${DB_USERNAME:-pcr_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-pcr_password}
+    ports:
+      - "${DB_FORWARD_PORT:-5433}:5432"
+    volumes:
+      - pcr_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-pcr_user} -d ${DB_DATABASE:-pcr_prueba_tecnica}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - pcr_network
+
+networks:
+  pcr_network:
+    driver: bridge
+
+volumes:
+  pcr_pgdata:
+    driver: local
