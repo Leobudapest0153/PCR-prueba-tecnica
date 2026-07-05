@@ -106,6 +106,19 @@ Todas las respuestas siguen el mismo formato:
 }
 ```
 
+El listado (`GET /solicitudes-tecnicas`) envía además la metadata de paginación dentro de `data`:
+
+```jsonc
+{
+  "success": true,
+  "message": "Solicitudes obtenidas correctamente.",
+  "data": {
+    "items": [{ "id": 1, "cliente": "...", "...": "..." }],
+    "meta": { "current_page": 1, "last_page": 3, "per_page": 15, "total": 42 }
+  }
+}
+```
+
 ### Valores permitidos
 
 - `prioridad`: `baja`, `media`, `alta`

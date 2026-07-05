@@ -27,7 +27,7 @@ class SolicitudTecnicaController extends Controller
     {
         $solicitudes = $this->solicitudTecnicaService->listar($request->validated());
 
-        return $this->success(
+        return $this->successPaginated(
             SolicitudTecnicaResource::collection($solicitudes),
             'Solicitudes obtenidas correctamente.'
         );
