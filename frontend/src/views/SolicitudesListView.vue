@@ -1,7 +1,8 @@
 <script setup>
+import { ref } from 'vue';
 import { useSolicitudesTecnicasStore } from '../stores/solicitudesTecnicas';
-import { PRIORIDAD_COLOR, labelPrioridad } from '../enums/prioridad';
-import { ESTADO_COLOR, labelEstado } from '../enums/estadoSolicitud';
+import { PRIORIDAD_COLOR, PRIORIDAD_OPCIONES, labelPrioridad } from '../enums/prioridad';
+import { ESTADO_COLOR, ESTADO_OPCIONES, labelEstado } from '../enums/estadoSolicitud';
 
 const store = useSolicitudesTecnicasStore();
 
@@ -12,6 +13,12 @@ const headers = [
     { title: 'Estado', key: 'estado', sortable: false },
     { title: 'Creada', key: 'fecha_creacion' },
 ];
+
+// Controlan la pagina actual de la tabla para poder forzar el regreso a la
+// pagina 1 desde afuera cuando el usuario cambia los filtros.
+const pagina = ref(1);
+const estadoFiltro = ref(null);
+const prioridadFiltro = ref(null);
 
 function formatearFecha(fechaIso) {
     if (!fechaIso) return '—';
@@ -33,6 +40,20 @@ async function alCambiarOpciones({ page, itemsPerPage }) {
 
     await store.cargar(page);
 }
+
+async function aplicarFiltros() {
+    pagina.value = 1;
+    await store.establecerFiltros({
+        estado: estadoFiltro.value,
+        prioridad: prioridadFiltro.value,
+    });
+}
+
+async function limpiarFiltros() {
+    estadoFiltro.value = null;
+    prioridadFiltro.value = null;
+    await aplicarFiltros();
+}
 </script>
 
 <template>
@@ -41,12 +62,49 @@ async function alCambiarOpciones({ page, itemsPerPage }) {
       <h1 class="text-h5">Solicitudes técnicas</h1>
     </div>
 
+    <v-card class="mb-4">
+      <v-card-text>
+        <v-row align="center">
+          <v-col cols="12" sm="4" md="3">
+            <v-select
+              v-model="estadoFiltro"
+              :items="ESTADO_OPCIONES"
+              item-title="label"
+              item-value="value"
+              label="Estado"
+              clearable
+              hide-details
+              @update:model-value="aplicarFiltros"
+            />
+          </v-col>
+
+          <v-col cols="12" sm="4" md="3">
+            <v-select
+              v-model="prioridadFiltro"
+              :items="PRIORIDAD_OPCIONES"
+              item-title="label"
+              item-value="value"
+              label="Prioridad"
+              clearable
+              hide-details
+              @update:model-value="aplicarFiltros"
+            />
+          </v-col>
+
+          <v-col cols="12" sm="4" md="3">
+            <v-btn variant="text" @click="limpiarFiltros">Limpiar filtros</v-btn>
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
+
     <v-alert v-if="store.error" type="error" variant="tonal" class="mb-4">
       Ocurrió un error al cargar las solicitudes. Intenta de nuevo.
     </v-alert>
 
     <v-card>
       <v-data-table-server
+        v-model:page="pagina"
         :headers="headers"
         :items="store.items"
         :items-length="store.meta.total"
