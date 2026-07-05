@@ -1,4 +1,4 @@
-FROM php:8.3-cli-alpine
+FROM php:8.4-cli-alpine
 
 # Dependencias del sistema necesarias para compilar las extensiones de PHP
 RUN apk add --no-cache \
