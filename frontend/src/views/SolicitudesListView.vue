@@ -3,8 +3,10 @@ import { ref } from 'vue';
 import { useSolicitudesTecnicasStore } from '../stores/solicitudesTecnicas';
 import { PRIORIDAD_COLOR, PRIORIDAD_OPCIONES, labelPrioridad } from '../enums/prioridad';
 import { ESTADO_COLOR, ESTADO_OPCIONES, labelEstado } from '../enums/estadoSolicitud';
+import CrearSolicitudDialog from '../components/CrearSolicitudDialog.vue';
 
 const store = useSolicitudesTecnicasStore();
+const dialogCrearAbierto = ref(false);
 
 const headers = [
     { title: 'Cliente', key: 'cliente' },
@@ -60,7 +62,12 @@ async function limpiarFiltros() {
   <v-container fluid>
     <div class="d-flex align-center justify-space-between mb-4">
       <h1 class="text-h5">Solicitudes técnicas</h1>
+      <v-btn color="primary" prepend-icon="mdi-plus" @click="dialogCrearAbierto = true">
+        Nueva solicitud
+      </v-btn>
     </div>
+
+    <CrearSolicitudDialog v-model="dialogCrearAbierto" />
 
     <v-card class="mb-4">
       <v-card-text>
