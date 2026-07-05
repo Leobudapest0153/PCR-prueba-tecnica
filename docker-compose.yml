@@ -1,18 +1,22 @@
 services:
   app:
     build:
-      context: .
+      context: ./backend
       dockerfile: docker/php/Dockerfile
     container_name: pcr_app
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
-      - .:/var/www/html
+      - ./backend:/var/www/html
     ports:
       - "${APP_PORT:-8000}:8000"
     environment:
       DB_HOST: db
       DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-pcr_prueba_tecnica}
+      DB_USERNAME: ${DB_USERNAME:-pcr_user}
+      DB_PASSWORD: ${DB_PASSWORD:-pcr_password}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
     depends_on:
       db:
         condition: service_healthy
