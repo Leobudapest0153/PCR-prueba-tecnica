@@ -4,9 +4,12 @@ import { useSolicitudesTecnicasStore } from '../stores/solicitudesTecnicas';
 import { PRIORIDAD_COLOR, PRIORIDAD_OPCIONES, labelPrioridad } from '../enums/prioridad';
 import { ESTADO_COLOR, ESTADO_OPCIONES, labelEstado } from '../enums/estadoSolicitud';
 import CrearSolicitudDialog from '../components/CrearSolicitudDialog.vue';
+import DetalleSolicitudDialog from '../components/DetalleSolicitudDialog.vue';
 
 const store = useSolicitudesTecnicasStore();
 const dialogCrearAbierto = ref(false);
+const dialogDetalleAbierto = ref(false);
+const solicitudSeleccionadaId = ref(null);
 
 const headers = [
     { title: 'Cliente', key: 'cliente' },
@@ -14,7 +17,13 @@ const headers = [
     { title: 'Prioridad', key: 'prioridad', sortable: false },
     { title: 'Estado', key: 'estado', sortable: false },
     { title: 'Creada', key: 'fecha_creacion' },
+    { title: '', key: 'acciones', sortable: false, align: 'end' },
 ];
+
+function verDetalle(solicitud) {
+    solicitudSeleccionadaId.value = solicitud.id;
+    dialogDetalleAbierto.value = true;
+}
 
 // Controlan la pagina actual de la tabla para poder forzar el regreso a la
 // pagina 1 desde afuera cuando el usuario cambia los filtros.
@@ -68,6 +77,7 @@ async function limpiarFiltros() {
     </div>
 
     <CrearSolicitudDialog v-model="dialogCrearAbierto" />
+    <DetalleSolicitudDialog v-model="dialogDetalleAbierto" :solicitud-id="solicitudSeleccionadaId" />
 
     <v-card class="mb-4">
       <v-card-text>
@@ -134,6 +144,16 @@ async function limpiarFiltros() {
 
         <template #item.fecha_creacion="{ item }">
           {{ formatearFecha(item.fecha_creacion) }}
+        </template>
+
+        <template #item.acciones="{ item }">
+          <v-btn
+            icon="mdi-eye-outline"
+            variant="text"
+            size="small"
+            title="Ver detalle"
+            @click="verDetalle(item)"
+          />
         </template>
 
         <template #no-data>
